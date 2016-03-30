@@ -10,8 +10,7 @@
                         ["releases" :clojars]]
   :profiles {:dev
              {:dependencies
-              [[com.palletops/pallet "0.8.10"
-                :classifier "tests"]]
+              [[com.palletops/pallet "0.8.11" :classifier "tests"]]
               :plugins
               [[com.palletops/pallet-lein "0.8.0-alpha.1"]]}
              :aws 
