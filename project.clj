@@ -1,4 +1,4 @@
-(defproject org.domaindrivenarchitecture/httpd "0.2.1-SNAPSHOT"
+(defproject org.domaindrivenarchitecture/httpd "0.2.1"
   :description "Pallet crate to install and run Apache httpd"
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [com.palletops/pallet "0.8.11"]
