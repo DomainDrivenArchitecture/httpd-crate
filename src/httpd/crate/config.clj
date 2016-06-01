@@ -9,6 +9,7 @@
 
 (ns httpd.crate.config)
 
+;TODO jem: Put in timeouts here
 (defn limits
   [& {:keys [max-clients]
       :or {max-clients "150"}}]
