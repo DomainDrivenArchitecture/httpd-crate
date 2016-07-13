@@ -13,7 +13,8 @@
              {:dependencies
               [[com.palletops/pallet "0.8.12" :classifier "tests"]]
               :plugins
-              [[com.palletops/pallet-lein "0.8.0-alpha.1"]]}
+              [[com.palletops/pallet-lein "0.8.0-alpha.1"]
+               [lein-sub "0.3.0"]]}
              :aws 
              {:dependencies 
               [
