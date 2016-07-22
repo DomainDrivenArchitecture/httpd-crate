@@ -45,14 +45,8 @@
    "</Location>"])
 
 (defn workers-configuration
-<<<<<<< HEAD
-  "Takes optional args and returns a workers-properties configuration. The key jk-worker-property is 
-   used to add JkWorkerProperty to the config file so it can be used in the Vhost-File."
-   [& {:keys [worker host port socket-connect-timeout maintain-timout-sec in-httpd-conf?]
-=======
   "Takes optional args and returns content for configure-mod-jk-worker"
-   [& {:keys [worker host port socket-timeout socket-connect-timeout maintain-timout-sec in-httpd-conf?]
->>>>>>> branch 'master' of git@github.com:DomainDrivenArchitecture/httpd-crate.git
+   [& {:keys [worker host port socket-connect-timeout maintain-timout-sec in-httpd-conf?]
       :or {port "8009"
            host "127.0.0.1"
            worker "mod_jk_www"
@@ -73,6 +67,7 @@
 
 
 (defn mod-jk-configuration
+  "Takes optional args and generates a Vector of Strings"
   [&{:keys [jkStripSession jkWatchdogInterval vhost-jk-status-location?]
      :or {jkStripSession "On"
           jkWatchdogInterval 120
