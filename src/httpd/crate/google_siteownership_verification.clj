@@ -13,14 +13,15 @@
     [pallet.actions :as actions]))
 
 (defn vhost-ownership-verification
-  [& {:keys [id consider-jk]
-      :or {consider-jk false}}]
+  [& {:keys [id consider-jk worker]
+      :or {consider-jk false
+           worker "mod_jk_www"}}]
   (into 
     []
     (concat
       [(str "Alias /google" id ".html \"/var/www/static/google/google" id ".html\"")]
       (if consider-jk 
-        (jk/vhost-jk-unmount :path (str "/google" id ".html"))
+        (jk/vhost-jk-unmount :path (str "/google" id ".html") :worker worker)
         [])
       [""]
       )))

@@ -66,15 +66,16 @@
   )
 
 (defn vhost-service-unavailable-error-page
- [& {:keys [consider-jk]
-    :or {consider-jk false}}]
+ [& {:keys [consider-jk worker]
+    :or {consider-jk false
+         worker "mod_jk_www"}}]
  (into 
   []
   (concat
    [(str "ErrorDocument 503 " "/error/503.html")
    "Alias /error \"/var/www/static/error\""]
    (if consider-jk 
-    (jk/vhost-jk-unmount :path "/error/*")
+    (jk/vhost-jk-unmount :path "/error/*" :worker worker)
     [])
    [""]
    ))
