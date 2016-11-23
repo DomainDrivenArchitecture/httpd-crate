@@ -1,4 +1,4 @@
-(defproject org.domaindrivenarchitecture/httpd "0.2.5-SNAPSHOT"
+(defproject org.domaindrivenarchitecture/httpd "0.2.5"
   :description "Pallet crate to install and run Apache httpd"
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [com.palletops/pallet "0.8.12"]
@@ -22,13 +22,13 @@
                ;; To get started we include all jclouds compute providers.
                ;; You may wish to replace this with the specific jclouds
                ;; providers you use, to reduce dependency sizes.
-               [org.apache.jclouds/jclouds-allblobstore "1.9.2"]
-               [org.apache.jclouds/jclouds-allcompute "1.9.2"]
-               [org.apache.jclouds.driver/jclouds-slf4j "1.9.2"
+               [org.apache.jclouds/jclouds-allblobstore "2.0.0"]
+               [org.apache.jclouds/jclouds-allcompute "2.0.0"]
+               [org.apache.jclouds.driver/jclouds-slf4j "2.0.0"
                 ;; the declared version is old and can overrule the
                 ;; resolved version
                 :exclusions [org.slf4j/slf4j-api]]
-               [org.apache.jclouds.driver/jclouds-sshj "1.9.2"]]}
+               [org.apache.jclouds.driver/jclouds-sshj "2.0.0"]]}
              :leiningen/reply
              {:dependencies [[org.slf4j/jcl-over-slf4j "1.7.21"]]
               :exclusions [commons-logging]}}
