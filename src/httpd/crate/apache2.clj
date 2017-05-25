@@ -6,14 +6,14 @@
 ; the terms of this license.
 ; You must not remove this notice, or any other, from this software.
 ;
-;; Apache2 Pallet Actions 
+;; Apache2 Pallet Actions
 
 (ns httpd.crate.apache2
-  (:require 
+  (:require
     [clojure.string :as string]
     [pallet.actions :as actions]
     [pallet.api :as api :refer [plan-fn]]
-    [pallet.crate :refer [assoc-settings 
+    [pallet.crate :refer [assoc-settings
                           defplan
                           get-settings]]
     [pallet.stevedore :as stevedore]
@@ -21,8 +21,8 @@
     [httpd.crate.vhost :as vhost]
     [httpd.crate.cmds :as cmds]
     [httpd.crate.config :as config]
-    [clojure.tools.logging :as logging]
-))
+    [clojure.tools.logging :as logging]))
+
 
 ;; Apache2 related pallet actions
 
@@ -36,7 +36,7 @@
     :mode "644"
     :force true
     :literal true
-    :content 
+    :content
     (string/join
       \newline
       content)))
@@ -44,46 +44,46 @@
 (defn configure-file-and-enable
   "Create, upload and enable an apache2 conf file"
   [conf-file-name content]
-  (configure-file (str "/etc/apache2/conf-available/" conf-file-name) 
+  (configure-file (str "/etc/apache2/conf-available/" conf-file-name)
                   content)
   (cmds/a2enconf conf-file-name))
 
 (defn configure-and-enable-vhost
   ([vhost-name vhost-content]
-    (configure-and-enable-vhost vhost-name vhost-content "2.4"))
+   (configure-and-enable-vhost vhost-name vhost-content "2.4"))
   ([vhost-name vhost-content apache-version]
-    (let [file-avail-name 
-          (str "/etc/apache2/sites-available/" vhost-name ".conf")]
-      (configure-file file-avail-name vhost-content)
-      (cmds/a2ensite (if (= apache-version "2.2")
-                       (str vhost-name ".conf")
-                       vhost-name))
-      )
-    )
-  )
+   (let [file-avail-name
+         (str "/etc/apache2/sites-available/" vhost-name ".conf")]
+     (configure-file file-avail-name vhost-content)
+     (cmds/a2ensite (if (= apache-version "2.2")
+                      (str vhost-name ".conf")
+                      vhost-name)))))
+
+
+
 
 (defn config-apache2-production-grade
-   [ & {:keys [limits 
-               security 
+   [ & {:keys [limits
+               security
                ports]
         :or {limits (config/limits)
              security config/security
              ports config/ports}}]
-   (configure-file-and-enable 
+   (configure-file-and-enable
      "limits.conf"
      limits)
-   (configure-file-and-enable 
+   (configure-file-and-enable
      "security.conf"
-     security)  
-   (configure-file 
-     "/etc/apache2/ports.conf" 
+     security)
+   (configure-file
+     "/etc/apache2/ports.conf"
      ports)
    (pallet.actions/exec
        {:language :bash}
        (stevedore/script
-         ("a2enmod headers")
-         ))
-   )
+         ("a2enmod headers"))))
+
+
 
 
 (defn install-apache2-action
@@ -110,21 +110,21 @@
 (defn install-letsencrypt-action
   []
   (actions/package "git")
-  (git/clone 
+  (git/clone
     "https://github.com/letsencrypt/letsencrypt"
-    :checkout-dir "/usr/lib/letsencrypt")
-  )
- 
-(defn install-letsencrypt-certs 
+    :checkout-dir "/usr/lib/letsencrypt"))
+
+
+(defn install-letsencrypt-certs
   [fqdn & {:keys [adminmail]}]
   (actions/exec-script
       ("service apache2 stop")
       ("/usr/lib/letsencrypt/letsencrypt-auto certonly --standalone --agree-tos --force-renew"
         "--email" ~(if (nil? adminmail) (str "admin@" fqdn) adminmail)
         "-d" ~fqdn)
-      ("service apache2 start")
-    )
-  )
+      ("service apache2 start")))
+
+
 
 (defn deploy-site
   "Deploy simple static index.html site to apache2. TODO: update this
@@ -161,7 +161,7 @@
   "Options: (TODO: none yet)"
   [settings & {:keys [instance-id] :as options}]
   (api/server-spec
-   :phases {:settings (plan-fn (httpd.crate.apache2/settings 
+   :phases {:settings (plan-fn (httpd.crate.apache2/settings
                                 (merge settings options)))
             :bootstrap (plan-fn (install-apache2 options))
             :restart (plan-fn (cmds/apache2ctl "restart"))}

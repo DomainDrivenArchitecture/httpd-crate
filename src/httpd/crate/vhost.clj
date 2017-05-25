@@ -20,37 +20,37 @@
   [& [domain-names]]
   (if domain-names
     [(apply str "ServerAlias " (interpose " " domain-names))]
-    [])
-  )
+    []))
+
 
 (defn vhost-head
   "listening spec may be: x.x.x.x:443 [x6:x6:x6:x6:x6:x6:x6:x6]:443"
   [& {:keys [listening-spec
              listening-interface
              listening-port
-             domain-name 
+             domain-name
              server-admin-email
              aliases]
       :or {listening-interface "*"
            listening-port "80"}}]
-  (let [used-server-admin-email 
+  (let [used-server-admin-email
         (if server-admin-email
           server-admin-email
           (str "admin@" domain-name))]
-    (into 
+    (into
       [(if listening-spec
          (str "<VirtualHost " listening-spec ">")
          (str "<VirtualHost " listening-interface ":" listening-port ">"))]
-      (common/prefix 
-        "  " 
+      (common/prefix
+        "  "
         (into []
-              (concat 
+              (concat
                 [(str "ServerName " domain-name)]
                 (vhost-server-alias aliases)
                 [(str "ServerAdmin " used-server-admin-email)
-                 ""])))
-      )
-  ))
+                 ""]))))))
+
+
 
 (def vhost-tail ["</VirtualHost>"])
 
@@ -59,25 +59,25 @@
   (if document-root-path
     [(str "DocumentRoot \"" document-root-path "\"")
      ""]
-    [])  
-  )
+    []))
+
 
 (defn vhost-directory
   [file-path & {:keys [directory-options]
                 :or {directory-options
                      ["Order allow,deny"
                       "Allow from all"]}}]
-  (into 
+  (into
     []
     (concat
       [(str "<Directory \"" file-path "\">")]
-      (common/prefix 
+      (common/prefix
           "  "
           directory-options)
       ["</Directory>"
-       ""]
-      ))
-  )
+       ""])))
+
+
 
 (defn vhost-location
   "If path is nil, defaults to \"/\" "
@@ -87,17 +87,17 @@
            location-options
            ["Order allow,deny"
             "Allow from all"]}}]
-   (into []
-        (concat
-          [(str "<Location " path ">")]
-          (common/prefix 
-            "  "
-            location-options)
-          ["</Location>"
-          ""]))
-   )
+  (into []
+       (concat
+         [(str "<Location " path ">")]
+         (common/prefix
+           "  "
+           location-options)
+         ["</Location>"
+          ""])))
 
-(defn vhost-log 
+
+(defn vhost-log
   [& {:keys [domain-name
              error-name
              log-name
@@ -109,67 +109,67 @@
                      (str domain-name "-")
                      "")]
     [(str "ErrorLog \"/var/log/apache2/" log-prefix error-name "\"")
-      "LogLevel warn"
+     "LogLevel warn"
       (str "CustomLog \"/var/log/apache2/" log-prefix log-name "\" " log-format)
-      ""]
-    )
-   )
+      ""]))
+
+
 
 (defn vhost-conf-default-redirect-to-https-only
   "Just redirect http request permanently to https"
-  [& {:keys [domain-name 
-             aliases 
-             server-admin-email 
-             document-root-path 
+  [& {:keys [domain-name
+             aliases
+             server-admin-email
+             document-root-path
              port]
       :or {server-admin-email "your-name@your-domain.com"
            port "80"}}]
-  (into 
+  (into
     []
     (concat
-      (vhost-head :listening-port port 
-                  :domain-name domain-name 
+      (vhost-head :listening-port port
+                  :domain-name domain-name
                   :server-admin-email server-admin-email
                   :aliases aliases)
-      (common/prefix 
+      (common/prefix
           "  "
-          (into 
+          (into
             []
             (concat
               (vhost-document-root document-root-path)
               (vhost-log :error-name "error.log"
                          :log-name "access.log"
                          :log-format "combined")
-              (rewrite/vhost-rewrite-rules 
+              (rewrite/vhost-rewrite-rules
                 ["RewriteCond %{HTTPS} !on"
                  "RewriteRule ^/(.*)$ https://%{SERVER_NAME}/$1 [R=301,L]"]
                 :use-proxy false))))
-      vhost-tail
-      )
-    )
-  )
+      vhost-tail)))
+
+
+
 
 (defn vhost-conf-ssl-default
   "a https default configuration"
-  [& {:keys [domain-name 
-             aliases 
-             server-admin-email 
-             document-root-path 
+  [& {:keys [domain-name
+             aliases
+             server-admin-email
+             document-root-path
              port
              ssl-module]
       :or {server-admin-email "your-name@your-domain.com"
            port "443"
            ssl-module :gnutls}}]
-  (into 
+  (into
     []
     (concat
       (vhost-head :listening-port port
-                  :domain-name domain-name 
+                  :domain-name domain-name
                   :server-admin-email server-admin-email
                   :aliases aliases)
-      (common/prefix 
+      (common/prefix
           "  "
-          (into 
+          (into
             []
             (concat
               (vhost-document-root document-root-path)
@@ -177,60 +177,56 @@
                  :log-name "ssl-access.log"
                  :log-format "combined")
               (if (= ssl-module :gnutls)
-                (gnutls/vhost-gnutls domain-name)
-                ))))   
-      vhost-tail
-      )
-    )
-  )
+                (gnutls/vhost-gnutls domain-name)))))
+
+      vhost-tail)))
+
+
+
 
 (defn vhost-conf-default
   "Most of my apache vhosts are for java apps. Here's what I usually use."
   [domain-name server-admin-email document-root-path aliases port]
-  (into 
+  (into
     []
     (concat
-      (vhost-head :domain-name domain-name 
+      (vhost-head :domain-name domain-name
                   :server-admin-email server-admin-email
                   :aliases aliases)
-      (common/prefix 
+      (common/prefix
           "  "
-          (into 
+          (into
             []
             (concat
               (vhost-document-root document-root-path)
               (vhost-log :domain-name domain-name)
               (vhost-location :path "/")
               (vhost-directory document-root-path)
-              (rewrite/vhost-rewrite-rules 
+              (rewrite/vhost-rewrite-rules
                 [(str "RewriteRule ^/$ http://localhost:" port "/ [P]")
-                 (str "RewriteRule ^/(.+)$ http://localhost:" port "/$1 [P]")])
-              )))
-      vhost-tail
-      )
-    )
-  )
-  
+                 (str "RewriteRule ^/(.+)$ http://localhost:" port "/$1 [P]")]))))
+
+      vhost-tail)))
+
+
+
+
 (defn vhost-conf
   "Generate a vhost config. domain-name will be used to name the vhost
   conf file as well as log files. If you need to set up complicated
   vhost, pass a string of xml to :vhost-xml and you will have full
   control over what the vhost file looks like"
-  [domain-name & [{:keys [server-admin-email document-root-path 
+  [domain-name & [{:keys [server-admin-email document-root-path
                           vhost-xml aliases port]
                    :as opts
                    :or {server-admin-email "your-name@your-domain.com"
                         port "3000"}}]]
-  (or 
-    vhost-xml 
+  (or
+    vhost-xml
     (string/join
       \newline
-      (vhost-conf-default 
-        domain-name 
-        server-admin-email 
-        document-root-path 
-        aliases port)
-      )
-    )
-  )
-
+      (vhost-conf-default
+        domain-name
+        server-admin-email
+        document-root-path
+        aliases port))))
