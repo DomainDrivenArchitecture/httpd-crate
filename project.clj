@@ -1,22 +1,22 @@
-(defproject org.domaindrivenarchitecture/httpd "0.2.6-SNAPSHOT"
+(defproject dda/httpd "0.2.6-SNAPSHOT"
   :description "Pallet crate to install and run Apache httpd"
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [com.palletops/pallet "0.8.12"]
-                 [com.palletops/git-crate "0.8.0-alpha.2" :exclusions [org.clojure/clojure]]
-                 [ch.qos.logback/logback-classic "1.1.8"]
-                 [com.palletops/pallet-vmfest "0.4.0-alpha.1"]]
+                 [com.palletops/git-crate "0.8.0-alpha.2" :exclusions [org.clojure/clojure]]]
   :repositories [["snapshots" :clojars]
                  ["releases" :clojars]]
   :deploy-repositories [["snapshots" :clojars]
                         ["releases" :clojars]]
   :profiles {:dev
              {:dependencies
-              [[com.palletops/pallet "0.8.12" :classifier "tests"]]
+              [[com.palletops/pallet "0.8.12" :classifier "tests"]
+               [ch.qos.logback/logback-classic "1.1.8"]
+               [com.palletops/pallet-vmfest "0.4.0-alpha.1"]]
               :plugins
               [[com.palletops/pallet-lein "0.8.0-alpha.1"]
                [lein-sub "0.3.0"]]}
-             :aws 
-             {:dependencies 
+             :aws
+             {:dependencies
               [
                [com.palletops/pallet-jclouds "1.7.3"]
                ;; To get started we include all jclouds compute providers.
@@ -32,5 +32,4 @@
              :leiningen/reply
              {:dependencies [[org.slf4j/jcl-over-slf4j "1.7.22"]]
               :exclusions [commons-logging]}}
-  :local-repo-classpath true
-  )
+  :local-repo-classpath true)

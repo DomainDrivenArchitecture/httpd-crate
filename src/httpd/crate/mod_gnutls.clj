@@ -7,31 +7,31 @@
 ; You must not remove this notice, or any other, from this software.
 
 (ns httpd.crate.mod-gnutls
-  (require 
+  (require
     [clojure.string :as string]
     [pallet.actions :as actions]
-    [pallet.stevedore :as stevedore]
-    ))
+    [pallet.stevedore :as stevedore]))
+
 
 (defn- certs-file-name
   [domain-name]
-  (str "/etc/apache2/ssl.crt/" domain-name ".certs")
-  )
+  (str "/etc/apache2/ssl.crt/" domain-name ".certs"))
+
 
 (defn- key-file-name
   [domain-name]
-  (str "/etc/apache2/ssl.key/" domain-name ".key")
-  )
+  (str "/etc/apache2/ssl.key/" domain-name ".key"))
+
 
 (defn- certs-file-name-letsencrypt
   [domain-name]
-  (str "/etc/letsencrypt/live/" domain-name "/fullchain.pem")
-  )
+  (str "/etc/letsencrypt/live/" domain-name "/fullchain.pem"))
+
 
 (defn- key-file-name-letsencrypt
   [domain-name]
-  (str "/etc/letsencrypt/live/" domain-name "/privkey.pem")
-  )
+  (str "/etc/letsencrypt/live/" domain-name "/privkey.pem"))
+
 
 (def gnutls-conf
   ["<IfModule mod_gnutls.c>"
@@ -45,15 +45,15 @@
               ca-cert]
        :or {intermediate-certs []
             ca-cert ""}}]
-  (into 
+  (into
     []
     (concat
       [domain-cert]
       intermediate-certs
       [ca-cert
-       ""]
-      ))
-  )
+       ""])))
+
+
 
 (defn configure-gnutls-credentials
   [ & {:keys [domain-name
@@ -74,8 +74,8 @@
     :force true
     :content
     (string/join
-      \newline 
-      (gnutls-certs 
+      \newline
+      (gnutls-certs
         :domain-cert domain-cert
         :intermediate-certs intermediate-certs
         :ca-cert ca-cert)))
@@ -85,32 +85,30 @@
     :group "root"
     :mode "600"
     :force true
-    :content domain-key)
-  )
+    :content domain-key))
 
-(defn vhost-gnutls 
+
+(defn vhost-gnutls
   [domain-name]
   ["GnuTLSEnable on"
-   "GnuTLSCacheTimeout 300"
    "GnuTLSPriorities SECURE:!VERS-SSL3.0:!MD5:!DHE-RSA:!DHE-DSS:!AES-256-CBC:%COMPAT"
    "GnuTLSExportCertificates on"
    ""
    (str "GnuTLSCertificateFile " (certs-file-name domain-name))
    (str "GnuTLSKeyFile " (key-file-name domain-name))
-   ""]
-  )
+   ""])
+
 
 (defn vhost-gnutls-letsencrypt
   [domain-name]
   ["GnuTLSEnable on"
-   "GnuTLSCacheTimeout 300"
    "GnuTLSPriorities SECURE:!VERS-SSL3.0:!MD5:!DHE-RSA:!DHE-DSS:!AES-256-CBC:%COMPAT"
    "GnuTLSExportCertificates on"
    ""
    (str "GnuTLSCertificateFile " (certs-file-name-letsencrypt domain-name))
    (str "GnuTLSKeyFile " (key-file-name-letsencrypt domain-name))
-   ""]
-  )
+   ""])
+
 
 (defn install-mod-gnutls
   []
@@ -119,29 +117,27 @@
     {:language :bash}
     (stevedore/script
       ("a2dismod ssl")
-      ("a2enmod gnutls"))
-    )
+      ("a2enmod gnutls")))
+
   (actions/directory
     "/etc/apache2/ssl.crt"
     :owner "root"
     :group "root"
-    :mode "700"
-    )
+    :mode "700")
+
   (actions/directory
     "/etc/apache2/ssl.key"
     :owner "root"
     :group "root"
-    :mode "700"
-    )
+    :mode "700")
+
   (actions/remote-file
     "/etc/apache2/mods-available/gnutls.conf"
     :owner "root"
     :group "root"
     :mode "644"
     :force true
-    :content 
+    :content
     (string/join
       \newline
-      gnutls-conf
-      ))
-  )
+      gnutls-conf)))
