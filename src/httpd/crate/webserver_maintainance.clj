@@ -9,8 +9,8 @@
 
 (ns httpd.crate.webserver-maintainance
  (:require
-  [clojure.string :as cloj-str] 
-  [httpd.crate.mod-jk :as jk]            
+  [clojure.string :as cloj-str]
+  [httpd.crate.mod-jk :as jk]
   [pallet.actions :as actions]))
 
 ;default maintainance error page content
@@ -35,48 +35,43 @@
    "                <p>Thank you for your understanding and your patience! </p>"
    "        </center>"
    "</body>"
-   "</html>"
-   ]
-  )
-
+   "</html>"])
 
 
 (defn write-maintainance-file
    [& {:keys [content]
-    :or {content var-www-static-error-503-html}}]
+       :or {content var-www-static-error-503-html}}]
    (actions/directory
      "/var/www/static/error"
      :action :create
-     :mode "644"
+     :mode "550"
      :owner "root"
      :group "www-data")
   (actions/remote-file
     "/var/www/static/error/503.html"
     :action :create
     :overwrite-changes true
-    :mode "644"
+    :mode "440"
     :literal true
-    :owner "root" 
+    :owner "root"
     :group "www-data"
     :content (cloj-str/join
                \newline
-               content
-               )
-    )
-  )
+               content)))
+
+
+
 
 (defn vhost-service-unavailable-error-page
  [& {:keys [consider-jk worker]
-    :or {consider-jk false
-         worker "mod_jk_www"}}]
- (into 
+     :or {consider-jk false
+          worker "mod_jk_www"}}]
+ (into
   []
   (concat
    [(str "ErrorDocument 503 " "/error/503.html")
-   "Alias /error \"/var/www/static/error\""]
-   (if consider-jk 
+    "Alias /error \"/var/www/static/error\""]
+   (if consider-jk
     (jk/vhost-jk-unmount :path "/error/*" :worker worker)
     [])
-   [""]
-   ))
- )
+   [""])))
