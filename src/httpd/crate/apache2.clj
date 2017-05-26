@@ -64,8 +64,8 @@
                security
                ports]
         :or {limits (config/limits)
-             security (config/security :name-based false)
-             ports config/ports}}]
+             security config/security
+             ports (config/ports :name-based false)}}]
    (configure-file-and-enable
      "limits.conf"
      limits)
