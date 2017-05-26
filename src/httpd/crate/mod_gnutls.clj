@@ -87,28 +87,28 @@
     :force true
     :content domain-key))
 
+(defn vhost-gnutls-existing
+    [cert-file-name
+     key-file-name]
+    ["GnuTLSEnable on"
+     "GnuTLSPriorities SECURE:!VERS-SSL3.0:!MD5:!DHE-RSA:!DHE-DSS:!AES-256-CBC:%COMPAT"
+     "GnuTLSExportCertificates on"
+     ""
+     (str "GnuTLSCertificateFile " cert-file-name)
+     (str "GnuTLSKeyFile " key-file-name)
+     ""])
 
 (defn vhost-gnutls
   [domain-name]
-  ["GnuTLSEnable on"
-   "GnuTLSPriorities SECURE:!VERS-SSL3.0:!MD5:!DHE-RSA:!DHE-DSS:!AES-256-CBC:%COMPAT"
-   "GnuTLSExportCertificates on"
-   ""
-   (str "GnuTLSCertificateFile " (certs-file-name domain-name))
-   (str "GnuTLSKeyFile " (key-file-name domain-name))
-   ""])
-
+  (vhost-gnutls-existing
+    (certs-file-name domain-name)
+    (key-file-name domain-name)))
 
 (defn vhost-gnutls-letsencrypt
   [domain-name]
-  ["GnuTLSEnable on"
-   "GnuTLSPriorities SECURE:!VERS-SSL3.0:!MD5:!DHE-RSA:!DHE-DSS:!AES-256-CBC:%COMPAT"
-   "GnuTLSExportCertificates on"
-   ""
-   (str "GnuTLSCertificateFile " (certs-file-name-letsencrypt domain-name))
-   (str "GnuTLSKeyFile " (key-file-name-letsencrypt domain-name))
-   ""])
-
+  (vhost-gnutls-existing
+      (certs-file-name-letsencrypt domain-name)
+      (key-file-name-letsencrypt domain-name)))
 
 (defn install-mod-gnutls
   []
