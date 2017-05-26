@@ -18,27 +18,33 @@
    (str "MaxClients  " max-clients)])
 
 (def ^:dynamic loadtest-logging
-  ["# Format is: [remote host] [remote logname] [remote user] [request time] \"[first request line]\" [status]" 
+  ["# Format is: [remote host] [remote logname] [remote user] [request time] \"[first request line]\" [status]"
    "# [respionse size in bytes] \"[referer]\" \"[user agent]\" [processtime in microseconds]"
    "LogFormat \"%h %l %u %t \\\"%r\\\" %>s %b \\\"%{Referer}i\\\" \\\"%{User-agent}i\\\" %D\" loadtest"
-  ""])
+   ""])
 
-(def ^:dynamic security
+(def security
   ["ServerTokens Prod"
    "ServerSignature On"
    "TraceEnable Off"
    "Header set X-Content-Type-Options: \"nosniff\""
-   "Header set X-Frame-Options: \"sameorigin\""
-])
+   "Header set X-Frame-Options: \"sameorigin\""])
 
-(def ^:dynamic ports
-  ["Listen 80"
-   ""
-   "<IfModule mod_ssl.c>"
-   "  Listen 443"
-   "</IfModule>"
-   ""
-   "<IfModule mod_gnutls.c>"
-   "  Listen 443"
-   "</IfModule>"
-   ""])
+
+(defn ports [& {:keys [name-based]
+                :or {name-based false}}]
+  (into []
+    (concat
+      ["Listen 80"]
+      (if name-based ["NameVirtualHost *:80"] [])
+      [""
+       "<IfModule mod_ssl.c>"
+       "  Listen 443"]
+      (if name-based ["  NameVirtualHost *:443"] [])
+      ["</IfModule>"
+       ""
+       "<IfModule mod_gnutls.c>"
+       "  Listen 443"]
+      (if name-based ["  NameVirtualHost *:443"] [])
+      ["</IfModule>"
+       ""])))

@@ -59,15 +59,12 @@
                       (str vhost-name ".conf")
                       vhost-name)))))
 
-
-
-
 (defn config-apache2-production-grade
    [ & {:keys [limits
                security
                ports]
         :or {limits (config/limits)
-             security config/security
+             security (config/security :name-based false)
              ports config/ports}}]
    (configure-file-and-enable
      "limits.conf"
@@ -83,13 +80,9 @@
        (stevedore/script
          ("a2enmod headers"))))
 
-
-
-
 (defn install-apache2-action
   []
   (actions/package "apache2"))
-
 
 (defplan install-apache2
   "Install apache2 package."
@@ -114,7 +107,6 @@
     "https://github.com/letsencrypt/letsencrypt"
     :checkout-dir "/usr/lib/letsencrypt"))
 
-
 (defn install-letsencrypt-certs
   [fqdn & {:keys [adminmail]}]
   (actions/exec-script
@@ -123,8 +115,6 @@
         "--email" ~(if (nil? adminmail) (str "admin@" fqdn) adminmail)
         "-d" ~fqdn)
       ("service apache2 start")))
-
-
 
 (defn deploy-site
   "Deploy simple static index.html site to apache2. TODO: update this
