@@ -1,17 +1,14 @@
 (defproject dda/httpd "0.2.8-SNAPSHOT"
   :description "Pallet crate to install and run Apache httpd"
-  :dependencies [[org.clojure/clojure "1.7.0"]
-                 [com.palletops/pallet "0.8.12"]
-                 [com.palletops/git-crate "0.8.0-alpha.2" :exclusions [org.clojure/clojure]]]
+  :dependencies [[dda/dda-pallet "2.2.0"]
+                 [dda/dda-git-crate "1.1.3"]]
   :repositories [["snapshots" :clojars]
                  ["releases" :clojars]]
   :deploy-repositories [["snapshots" :clojars]
                         ["releases" :clojars]]
   :profiles {:dev
              {:dependencies
-              [[com.palletops/pallet "0.8.12" :classifier "tests"]
-               [ch.qos.logback/logback-classic "1.2.3"]
-               [com.palletops/pallet-vmfest "0.4.0-alpha.1"]]
+              [[ch.qos.logback/logback-classic "1.2.3"]]
               :plugins
               [[com.palletops/pallet-lein "0.8.0-alpha.1"]
                [lein-sub "0.3.0"]]}

@@ -7,7 +7,7 @@
 ; You must not remove this notice, or any other, from this software.
 
 (ns httpd.crate.mod-gnutls
-  (require
+  (:require
     [clojure.string :as string]
     [pallet.actions :as actions]
     [pallet.stevedore :as stevedore]))

@@ -7,25 +7,25 @@
 ; You must not remove this notice, or any other, from this software.
 
 (ns httpd.crate.mod-jk
-  (require 
+  (:require
     [clojure.string :as string]
     [pallet.actions :as actions]
-    [httpd.crate.cmds :as cmds]
-    ))
+    [httpd.crate.cmds :as cmds]))
+
 
 (defn vhost-jk-mount
   [& {:keys [path worker]
       :or {path "/*"
            worker "mod_jk_www"}}]
-  [(str "JkMount " path  " " worker)]
-  )
+  [(str "JkMount " path  " " worker)])
+
 
 (defn vhost-jk-unmount
   [& {:keys [path worker]
       :or {path "/*"
            worker "mod_jk_www"}}]
-  [(str "JkUnMount " path  " " worker)]
-  )
+  [(str "JkUnMount " path  " " worker)])
+
 
 (defn vhost-jk-status-location
   []
@@ -48,14 +48,14 @@
 (defn workers-configuration
   "Takes optional args and returns content for configure-mod-jk-worker"
    [& {:keys [worker host port socket-connect-timeout-ms maintain-timout-sec in-httpd-conf ping-mode socket-keep-alive]
-      :or {port "8009"
-           host "127.0.0.1"
-           worker "mod_jk_www"
-           socket-connect-timeout-ms 900000
-           maintain-timout-sec 90
-           in-httpd-conf false
-           ping-mode nil
-           socket-keep-alive false}}]
+       :or {port "8009"
+            host "127.0.0.1"
+            worker "mod_jk_www"
+            socket-connect-timeout-ms 900000
+            maintain-timout-sec 90
+            in-httpd-conf false
+            ping-mode nil
+            socket-keep-alive false}}]
    (let [jkworkerproperty (when in-httpd-conf "JkWorkerProperty ")]
      (into 
        []
@@ -70,8 +70,8 @@
            [(str jkworkerproperty "worker." worker ".ping_mode=" ping-mode)])
          [(str jkworkerproperty "worker." worker ".socket_keepalive="socket-keep-alive)
           (str jkworkerproperty "worker." worker ".connection_pool_timeout=100")
-          ""]))
-     ))
+          ""]))))
+
 
 
 (defn mod-jk-configuration
@@ -85,20 +85,20 @@
     (concat 
       ["<IfModule jk_module>"
        "  "]
-       (when (some? workers-properties-file)
-         [(str "  JkWorkersFile " workers-properties-file)
-          "  "])
-       ["  JkLogFile /var/log/apache2/mod_jk.log"
-        "  JkLogLevel info"
-        "  JkShmFile /var/log/apache2/jk-runtime-status"
-        "  "
-        "  JkOptions +RejectUnsafeURI"
+      (when (some? workers-properties-file)
+        [(str "  JkWorkersFile " workers-properties-file)
+         "  "])
+      ["  JkLogFile /var/log/apache2/mod_jk.log"
+       "  JkLogLevel info"
+       "  JkShmFile /var/log/apache2/jk-runtime-status"
+       "  "
+       "  JkOptions +RejectUnsafeURI"
        (str "  JkStripSession " jkStripSession)
        (str "  JkWatchdogInterval " jkWatchdogInterval)
        "  "]
       (when vhost-jk-status-location?
         (vhost-jk-status-location))
-       ["</IfModule>"])))
+      ["</IfModule>"])))
 
 
 (defn configure-mod-jk-worker
@@ -131,7 +131,6 @@
     :content 
     (string/join
       \newline
-      (mod-jk-configuration jkStripSession jkWatchdogInterval)
-      ))  
-  (cmds/a2enmod "jk")
-  )
+      (mod-jk-configuration jkStripSession jkWatchdogInterval)))
+
+  (cmds/a2enmod "jk"))

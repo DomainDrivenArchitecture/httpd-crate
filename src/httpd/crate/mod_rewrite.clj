@@ -7,13 +7,13 @@
 ; You must not remove this notice, or any other, from this software.
 
 (ns httpd.crate.mod-rewrite
-  (require
+  (:require
     [httpd.crate.cmds :as cmds]))
 
 (defn install-mod-rewrite
   []
-  (cmds/a2enmod "rewrite")
-  )
+  (cmds/a2enmod "rewrite"))
+
 
 (defn vhost-rewrite-rules
   "Define the rewrite rules for a VirtualHost. Pass a vector of
@@ -34,5 +34,4 @@
             ["RewriteEngine on"]
             rewrite-rules
             [""]))
-    []
-    ))
+    []))

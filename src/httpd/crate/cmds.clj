@@ -9,7 +9,7 @@
 ;; fn's to call apache2 commands on server
 
 (ns httpd.crate.cmds
-  (require 
+  (:require
     [pallet.actions]))
 
 (defn apache2ctl

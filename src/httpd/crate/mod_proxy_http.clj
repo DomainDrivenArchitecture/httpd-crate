@@ -7,11 +7,11 @@
 ; You must not remove this notice, or any other, from this software.
 
 (ns httpd.crate.mod-proxy-http
-  (require 
+  (:require
     [clojure.string :as string]
     [pallet.actions :as actions]
-    [httpd.crate.cmds :as cmds]
-    ))
+    [httpd.crate.cmds :as cmds]))
+
 
 (defn vhost-proxy
   [& {:keys [target-host
@@ -28,13 +28,12 @@
     (concat
       additional-directives
       [(str "ProxyPass " mapped-url-path " http://" target-host ":" target-port "/")
-       (str "ProxyPassReverse " mapped-url-path " http://" target-host ":" target-port "/")]
-      ))
-  )
+       (str "ProxyPassReverse " mapped-url-path " http://" target-host ":" target-port "/")])))
+
+
 
 (defn install-mod-proxy-http
   []
   (actions/package "libapache2-mod-proxy-html")
   (cmds/a2enmod "proxy_http")
-  (cmds/a2enmod "proxy")
-  )
+  (cmds/a2enmod "proxy"))

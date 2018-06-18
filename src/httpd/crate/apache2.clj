@@ -17,11 +17,10 @@
                           defplan
                           get-settings]]
     [pallet.stevedore :as stevedore]
-    [pallet.crate.git :as git]
-    [httpd.crate.vhost :as vhost]
+    [dda.pallet.dda-git-crate.infra.git-repo :as git]
     [httpd.crate.cmds :as cmds]
-    [httpd.crate.config :as config]
-    [clojure.tools.logging :as logging]))
+    [httpd.crate.config :as config]))
+
 
 
 ;; Apache2 related pallet actions
@@ -60,61 +59,62 @@
                       vhost-name)))))
 
 (defn config-apache2-production-grade
-   [ & {:keys [limits
-               security
-               ports]
-        :or {limits (config/limits)
+  [& {:keys [limits
+             security
+             ports]
+      :or   {limits   (config/limits)
              security config/security
-             ports (config/ports :name-based false)}}]
-   (configure-file-and-enable
-     "limits.conf"
-     limits)
-   (configure-file-and-enable
-     "security.conf"
-     security)
-   (configure-file
-     "/etc/apache2/ports.conf"
-     ports)
-   (pallet.actions/exec
-       {:language :bash}
-       (stevedore/script
-         ("a2enmod headers"))))
+             ports    (config/ports :name-based false)}}]
+  (configure-file-and-enable
+    "limits.conf"
+    limits)
+  (configure-file-and-enable
+    "security.conf"
+    security)
+  (configure-file
+    "/etc/apache2/ports.conf"
+    ports)
+  (pallet.actions/exec
+    {:language :bash}
+    (stevedore/script
+      ("a2enmod headers"))))
 
 (defn install-apache2-action
   []
   (actions/package "apache2"))
 
 (defplan install-apache2
-  "Install apache2 package."
-  [{:keys [instance-id]}]
-  (let [settings (get-settings :httpd {:instance-id instance-id})]
-    (install-apache2-action)))
+         "Install apache2 package."
+         [{:keys [instance-id]}]
+         (let [settings (get-settings :httpd {:instance-id instance-id})]
+           (install-apache2-action)))
 
 (defn install-apachetop-action
   []
   (actions/package "apachetop"))
 
 (defplan install-apachetop
-  "Install apachetop package."
-  [{:keys [instance-id]}]
-  (let [settings (get-settings :httpd {:instance-id instance-id})]
-    (install-apachetop-action)))
+         "Install apachetop package."
+         [{:keys [instance-id]}]
+         (let [settings (get-settings :httpd {:instance-id instance-id})]
+           (install-apachetop-action)))
 
 (defn install-letsencrypt-action
   []
   (actions/package "git")
   (git/clone
-    "https://github.com/letsencrypt/letsencrypt"
-    :checkout-dir "/usr/lib/letsencrypt"))
+    {:repo "https://github.com/letsencrypt/letsencrypt"
+     :local-dir "/usr/lib/letsencrypt"
+     :settings #{}}))
 
 (defn install-letsencrypt-certs
   [fqdn & {:keys [adminmail]}]
   (actions/exec-script
-      ("service apache2 stop")
-      ("/usr/lib/letsencrypt/letsencrypt-auto certonly --standalone --agree-tos --force-renew"
-        "--email" ~(if (nil? adminmail) (str "admin@" fqdn) adminmail)
-        "-d" ~fqdn)
-      ("service apache2 start")))
+    ("service apache2 stop")
+    ("/usr/lib/letsencrypt/letsencrypt-auto certonly --standalone --agree-tos --force-renew"
+      "--email" ~(if (nil? adminmail) (str "admin@" fqdn) adminmail)
+      "-d" ~fqdn)
+    ("service apache2 start")))
 
 (defn deploy-site
   "Deploy simple static index.html site to apache2. TODO: update this
@@ -123,9 +123,9 @@
   ;; ensure the directory is created
   (pallet.actions/directory remote-dir-path)
   ;; create index.html
-  (let [content (str "<html>"\newline
-                     "<head><title>New Site</title></head>"\newline
-                     "<body><div>Hello, World</div></body>"\newline
+  (let [content (str "<html>" \newline
+                     "<head><title>New Site</title></head>" \newline
+                     "<body><div>Hello, World</div></body>" \newline
                      "</html>")]
     (pallet.actions/remote-file (str remote-dir-path "/index.html")
                                 :owner "root"
@@ -137,22 +137,22 @@
   {})
 
 (defplan settings
-  "TODO: other crates merge settings like this so it's possible to
-  control aspects of actions via lein-crate. This is here so we can
-  use in the future, but right now, settings are not used for
-  anything yet
+         "TODO: other crates merge settings like this so it's possible to
+         control aspects of actions via lein-crate. This is here so we can
+         use in the future, but right now, settings are not used for
+         anything yet
 
-  Set options for installing and configuring the apache crate"
-  [{:keys [instance-id] :as settings}]
-  (assoc-settings
-   :httpd (merge *default-settings* settings) {:instance-id instance-id}))
+         Set options for installing and configuring the apache crate"
+         [{:keys [instance-id] :as settings}]
+         (assoc-settings
+           :httpd (merge *default-settings* settings) {:instance-id instance-id}))
 
 (defn server-spec
   "Options: (TODO: none yet)"
   [settings & {:keys [instance-id] :as options}]
   (api/server-spec
-   :phases {:settings (plan-fn (httpd.crate.apache2/settings
-                                (merge settings options)))
-            :bootstrap (plan-fn (install-apache2 options))
-            :restart (plan-fn (cmds/apache2ctl "restart"))}
-   :default-phases [:install]))
+    :phases {:settings  (plan-fn (httpd.crate.apache2/settings
+                                   (merge settings options)))
+             :bootstrap (plan-fn (install-apache2 options))
+             :restart   (plan-fn (cmds/apache2ctl "restart"))}
+    :default-phases [:install]))

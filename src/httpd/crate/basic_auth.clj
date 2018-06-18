@@ -7,21 +7,20 @@
 ; You must not remove this notice, or any other, from this software.
 
 (ns httpd.crate.basic-auth
-  (require 
+  (:require
     [clojure.string :as string]
-    [pallet.actions :as actions]
-    [pallet.stevedore :as stevedore]
-    ))
+    [pallet.actions :as actions]))
+
 
 (defn- htpasswd-file-name
   [domain-name]
-  (str "/etc/apache2/htpasswd-" domain-name)
-  )
+  (str "/etc/apache2/htpasswd-" domain-name))
+
 
 (defn configure-basic-auth-user-credentials
   "For passwordgeneration use htpasswd -nbs user passwd"
-  [ & {:keys [domain-name
-              user-credentials]}]
+  [& {:keys [domain-name
+             user-credentials]}]
   {:pre [(not (nil? domain-name))
          (not (nil? user-credentials))
          (vector? user-credentials)]}
@@ -34,17 +33,17 @@
     :force true
     :content
     (string/join
-      \newline 
-      user-credentials))
-  )
+      \newline
+      user-credentials)))
+
 
 (defn vhost-basic-auth-options
-  [ & {:keys [domain-name
-              authz-options]
-       :or {authz-options ["Require valid-user"]}
-       }]
+  [& {:keys [domain-name
+             authz-options]
+      :or   {authz-options ["Require valid-user"]}}]
+
   {:pre [(not (nil? domain-name))]}
-  (into 
+  (into
     []
     (concat
       [(str "AuthName \"Authorization for " domain-name "\"")

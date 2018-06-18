@@ -23,8 +23,8 @@
       (if consider-jk 
         (jk/vhost-jk-unmount :path (str "/google" id ".html") :worker worker)
         [])
-      [""]
-      )))
+      [""])))
+
 
 (defn configure-ownership-verification
   [& {:keys [id]}]
@@ -41,5 +41,4 @@
     :mode "644"
     :force true
     :content 
-    (str "google-site-verification: google" id ".html"))
-  )
+    (str "google-site-verification: google" id ".html")))
