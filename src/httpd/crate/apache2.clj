@@ -17,7 +17,6 @@
                           defplan
                           get-settings]]
     [pallet.stevedore :as stevedore]
-    [dda.pallet.dda-git-crate.infra.git-repo :as git]
     [httpd.crate.cmds :as cmds]
     [httpd.crate.config :as config]))
 
@@ -98,14 +97,6 @@
          [{:keys [instance-id]}]
          (let [settings (get-settings :httpd {:instance-id instance-id})]
            (install-apachetop-action)))
-
-(defn install-letsencrypt-action
-  []
-  (actions/package "git")
-  (git/clone
-    {:repo "https://github.com/letsencrypt/letsencrypt"
-     :local-dir "/usr/lib/letsencrypt"
-     :settings #{}}))
 
 (defn install-letsencrypt-certs
   [fqdn & {:keys [adminmail]}]
