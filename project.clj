@@ -1,4 +1,4 @@
-(defproject dda/httpd "0.2.8-SNAPSHOT"
+(defproject dda/httpd "0.2.8"
   :description "Pallet crate to install and run Apache httpd"
   :dependencies [[dda/dda-pallet "2.2.0"]
                  [dda/dda-git-crate "1.1.3"]]
