@@ -12,17 +12,17 @@ contributions are welcome!
 ## compatability
 
 This crate is working with:
- * pallet 0.8
- * ubuntu 14.04
+ * pallet 0.9
+ * ubuntu 16.04
  * apache httpd 2.4
 
 ## Features
  * creation of complex vhost files
  * use https (gnutls). Config is proven at https://www.ssllabs.com/ssltest/
  * use proxy_http
- * use basic authentication 
+ * use basic authentication
  * production grade apache hardening
- 
+
 ## Usage Examples
 
 Required dependencies
@@ -41,7 +41,7 @@ private key and also automatically runs apt-get update
     (def base-server
       (server-spec
         :phases
-        {:bootstrap (plan-fn 
+        {:bootstrap (plan-fn
             ;; setup private key ssh
             (automated-admin-user)
             ;; update packages
@@ -54,7 +54,7 @@ Create the pallet service and node-spec
       (node-spec
         :image {:image-id :ubuntu-14.04}
         :hardware {:min-cores 1}))
-        
+
 Define a group-spec that extends `apache2/server-spec`. The
 `apache2/server-spec` will install apache2 package during configure
 phase and adds a `:restart` :phase for conveniently restarting apache.
@@ -63,7 +63,7 @@ options so that the `apache2/server-spec` can control much more.
 
     (def apache2
       (group-spec "apache2"
-        :extends [base-server 
+        :extends [base-server
              (apache2/server-spec {})]
         :node-spec default-node-spec))
 
@@ -126,7 +126,7 @@ Configure ports
             :compute s
             :phase (plan-fn (apache2/configure-file-and-enable
                              "ports.conf" conf/ports))))
-                             
+
 Setup mod_jk
 
     (require '[httpd.crate.mod-jk :as jk])
@@ -137,23 +137,23 @@ Setup mod_jk
                           (gnutls/configure-jk-worker))))
 
 
-Setup vhosts. Here's an example of a fairly complicted vhost: 
+Setup vhosts. Here's an example of a fairly complicted vhost:
 
     (require '[httpd.crate.vhost :as vhost])
     (require '[httpd.crate.basic-auth :as auth])
 
     (def vhost-content
-      (into 
+      (into
       []
         (concat
           (vhost/vhost-head :listening-port "443"
-                            :domain-name "domain-name" 
+                            :domain-name "domain-name"
                             :server-admin-email "server-admin-email")
-          (proxy/vhost-proxy :target-port "app-port") 
+          (proxy/vhost-proxy :target-port "app-port")
           (vhost/vhost-location
              :location-options
              (auth/vhost-basic-auth-options :domain-name "domain-name"))
-          (vhost/vhost-log 
+          (vhost/vhost-log
            :error-name "error.log"
            :log-name "ssl-access.log"
            :log-format "combined")

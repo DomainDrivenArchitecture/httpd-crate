@@ -9,23 +9,19 @@
 (ns httpd.crate.mod-gnutls-test
   (:require
     [clojure.test :refer :all]
-    [pallet.actions :as actions]
-    [httpd.crate.mod-gnutls :as sut]
-    ))
+    [httpd.crate.mod-gnutls :as sut]))
+
 
 (deftest create-certs
   (testing
     "create the correct ordered multi-cert"
-    (is 
+    (is
       (= ["domain-cert"
           "intermediate-cert"
           "ca-cert"
           ""]
-         (sut/gnutls-certs 
-           :domain-name "owncloud.politaktiv.org" 
-           :domain-cert "domain-cert" 
+         (sut/gnutls-certs
+           :domain-name "owncloud.politaktiv.org"
+           :domain-cert "domain-cert"
            :intermediate-certs ["intermediate-cert"]
-           :ca-cert "ca-cert")         
-         ))
-    )
-  )
+           :ca-cert "ca-cert")))))

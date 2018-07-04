@@ -9,7 +9,6 @@
 (ns httpd.crate.config-test
   (:require
     [clojure.test :refer :all]
-    [pallet.actions :as actions]
     [httpd.crate.vhost :as vhost]
     [httpd.crate.config :as config]))
 

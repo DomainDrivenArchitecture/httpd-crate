@@ -9,35 +9,28 @@
 (ns httpd.crate.base-auth-test
   (:require
     [clojure.test :refer :all]
-    [httpd.crate.basic-auth :as sut]
-    ))
+    [httpd.crate.basic-auth :as sut]))
 
 (deftest vhost-basic-auth-options
   (testing
-    (is 
-      (= ["AuthName \"Authorization for owncloud.politaktiv.org\"" 
-          "AuthType Basic" 
-          "AuthBasicProvider file" 
-          "AuthUserFile /etc/apache2/htpasswd-owncloud.politaktiv.org" 
-          "Require valid-user"] 
-         (sut/vhost-basic-auth-options 
-           :domain-name "owncloud.politaktiv.org")         
-         ))
-    )
-  
+    (is
+      (= ["AuthName \"Authorization for owncloud.politaktiv.org\""
+          "AuthType Basic"
+          "AuthBasicProvider file"
+          "AuthUserFile /etc/apache2/htpasswd-owncloud.politaktiv.org"
+          "Require valid-user"]
+         (sut/vhost-basic-auth-options
+           :domain-name "owncloud.politaktiv.org"))))
   (testing
-    (is 
-      (= ["AuthName \"Authorization for owncloud.politaktiv.org\"" 
-          "AuthType Basic" 
-          "AuthBasicProvider file" 
-          "AuthUserFile /etc/apache2/htpasswd-owncloud.politaktiv.org" 
+    (is
+      (= ["AuthName \"Authorization for owncloud.politaktiv.org\""
+          "AuthType Basic"
+          "AuthBasicProvider file"
+          "AuthUserFile /etc/apache2/htpasswd-owncloud.politaktiv.org"
           "Require env auth_not_required"
-          "Require valid-user"] 
-         (sut/vhost-basic-auth-options 
+          "Require valid-user"]
+         (sut/vhost-basic-auth-options
            :domain-name "owncloud.politaktiv.org"
            :authz-options
            ["Require env auth_not_required"
-            "Require valid-user"])         
-         ))
-    )
-  )
+            "Require valid-user"])))))

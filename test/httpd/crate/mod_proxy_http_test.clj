@@ -9,28 +9,24 @@
 (ns httpd.crate.mod-proxy-http-test
   (:require
     [clojure.test :refer :all]
-    [pallet.actions :as actions]
-    [httpd.crate.mod-proxy-http :as sut]
-    ))
+    [httpd.crate.mod-proxy-http :as sut]))
+
 
 (deftest vhost
   (testing
     "create the correct ordered multi-cert"
-    (is 
-      (= ["ProxyRequests     On" 
+    (is
+      (= ["ProxyRequests     On"
           "ProxyPreserveHost On"
           "ProxyPass / http://localhost:8080/"
           "ProxyPassReverse / http://localhost:8080/"]
-         (sut/vhost-proxy)         
-         ))
-    (is 
-      (= ["ProxyRequests     On" 
+         (sut/vhost-proxy)))
+
+    (is
+      (= ["ProxyRequests     On"
           "ProxyPreserveHost On"
           "ProxyPass / http://on.other.host:1234/"
           "ProxyPassReverse / http://on.other.host:1234/"]
          (sut/vhost-proxy
            :target-host "on.other.host"
-           :target-port "1234")         
-         ))
-    )
-  )
+           :target-port "1234")))))
